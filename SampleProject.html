@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Pharmacy Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Light gray background */
+        }
+        .page-section {
+            display: none; /* Hide all pages by default */
+        }
+        .page-section.active {
+            display: block; /* Show active page */
+        }
+        /* Custom scrollbar for product list */
+        .product-grid-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .product-grid-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .product-grid-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        .product-grid-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .cryptocurrency-icon {
+            width: 4rem; /* 64px */
+            height: 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px; /* full circle */
+            color: #fff;
+            font-size: 1.5rem; /* 24px */
+            font-weight: bold;
+        }
+        .btn-crypto {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem; /* 24px */
+            border: 1px solid #e2e8f0; /* gray-200 */
+            border-radius: 0.5rem; /* rounded-lg */
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-crypto:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            border-color: #38bdf8; /* sky-400 */
+        }
+        .btn-crypto.active {
+            border-color: #0d9488; /* teal-600 */
+            border-width: 2px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+            position: relative;
+        }
+        .btn-crypto.active::after {
+            content: "✓";
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: #0d9488;
+            color: white;
+            border-radius: 9999px;
+            width: 1.5rem;
+            height: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="bg-gradient-to-r from-teal-500 to-cyan-600 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-4 md:mb-0">
+                <i class="fas fa-prescription-bottle-alt text-3xl mr-3"></i>
+                <h1 class="text-3xl font-bold">E-Pharmacy</h1>
+            </div>
+            <nav class="flex flex-wrap justify-center md:justify-start space-x-4 md:space-x-6 text-lg font-medium">
+                <a href="#" class="nav-link hover:text-teal-200 transition duration-300 rounded-md px-2 py-1" data-page="home-page">Home</a>
+                <a href="#" class="nav-link hover:text-teal-200 transition duration-300 rounded-md px-2 py-1" data-page="products-page">Products</a>
+                <a href="#" class="nav-link hover:text-teal-200 transition duration-300 rounded-md px-2 py-1" data-page="about-page">About</a>
+                <a href="#" class="nav-link hover:text-teal-200 transition duration-300 rounded-md px-2 py-1" data-page="contact-page">Contact</a>
+                <a href="#" class="nav-link hover:text-teal-200 transition duration-300 rounded-md px-2 py-1" data-page="wallet-page">Wallet</a>
+                <a href="#" class="nav-link hover:text-teal-200 transition duration-300 rounded-md px-2 py-1" data-page="order-tracking-page">Track Order</a>
+                <a href="#" class="nav-link hover:text-teal-200 transition duration-300 rounded-md px-2 py-1" data-page="recent-orders-page">Recent Orders</a>
+            </nav>
+            <div class="flex items-center mt-4 md:mt-0 space-x-4">
+                <div class="relative">
+                    <input type="text" id="search-input" placeholder="Search products..." class="p-2 pl-10 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-300 shadow-sm">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                </div>
+                <button id="cart-button" class="relative p-2 rounded-full hover:bg-teal-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-teal-300">
+                    <i class="fas fa-shopping-cart text-2xl"></i>
+                    <span id="cart-count" class="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center -mt-1 -mr-1">0</span>
+                </button>
+                <button id="login-signup-button" class="bg-white text-teal-600 px-4 py-2 rounded-full font-semibold hover:bg-teal-100 transition duration-300 shadow-md">Login / Signup</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto p-4 md:p-8">
+
+        <section id="home-page" class="page-section active bg-white rounded-lg shadow-xl p-8 mb-8">
+            <div class="text-center">
+                <img src="Ec.png" alt="Pharmacy Banner" class="w-full h-auto rounded-lg shadow-md mb-8">
+                  <h2 class="text-5xl font-extrabold text-teal-700 mb-6 animate-fade-in-down">Welcome to E-Pharmacy!</h2>
+                <p class="text-xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed">Online medicine shopping through the crypto currency payment methods</p>
+                
+                <button class="bg-teal-600 text-white px-8 py-4 rounded-full text-xl font-semibold hover:bg-teal-700 transition duration-300 shadow-lg transform hover:scale-105" onclick="showPage('products-page')">Explore Products</button>
+            </div>
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="p-6 bg-teal-50 rounded-lg shadow-md">
+                    <i class="fas fa-truck-fast text-5xl text-teal-600 mb-4"></i>
+                    <h3 class="text-2xl font-bold text-teal-800 mb-2">Fast Delivery</h3>
+                    <p class="text-gray-600">Get your medications delivered quickly and safely.</p>
+                </div>
+                <div class="p-6 bg-teal-50 rounded-lg shadow-md">
+                    <i class="fas fa-shield-alt text-5xl text-teal-600 mb-4"></i>
+                    <h3 class="text-2xl font-bold text-teal-800 mb-2">Quality Products</h3>
+                    <p class="text-gray-600">Only genuine and high-quality products from trusted brands.</p>
+                </div>
+                <div class="p-6 bg-teal-50 rounded-lg shadow-md">
+                    <i class="fas fa-wallet text-5xl text-teal-600 mb-4"></i>
+                    <h3 class="text-2xl font-bold text-teal-800 mb-2">Crypto Payments</h3>
+                    <p class="text-gray-600">Secure and convenient payments with cryptocurrencies.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="auth-page" class="page-section bg-white rounded-lg shadow-xl p-8 mb-8 max-w-md mx-auto">
+            <h2 id="auth-title" class="text-4xl font-bold text-teal-700 mb-6 text-center">Login / Signup</h2>
+            <div id="role-selection-mode">
+                <h3 class="text-2xl font-semibold text-gray-700 mb-4 text-center">Select Your Role</h3>
+                <div class="grid grid-cols-1 gap-4">
+                    <button class="role-btn bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 shadow-md" data-role="customer">
+                        <i class="fas fa-user-circle mr-2"></i> Customer Login/Signup
+                    </button>
+                    <button class="role-btn bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 shadow-md" data-role="dealer">
+                        <i class="fas fa-truck-loading mr-2"></i> Dealer Login/Signup
+                    </button>
+                    <button class="role-btn bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 shadow-md" data-role="admin">
+                        <i class="fas fa-user-shield mr-2"></i> Admin Login
+                    </button>
+                </div>
+            </div>
+
+            <div id="auth-form-mode" class="hidden">
+                <div class="flex justify-center mb-6">
+                    <button id="show-login" class="px-6 py-3 rounded-l-lg font-semibold text-lg bg-teal-600 text-white shadow-md">Login</button>
+                    <button id="show-signup" class="px-6 py-3 rounded-r-lg font-semibold text-lg bg-gray-200 text-gray-700 shadow-md">Signup</button>
+                </div>
+
+                <form id="login-form" class="space-y-6">
+                    <input type="hidden" id="login-role-input" value="customer">
+                    <div>
+                        <label for="login-username" class="block text-gray-700 text-sm font-bold mb-2">Username:</label>
+                        <input type="text" id="login-username" class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-400" placeholder="Your Username">
+                    </div>
+                    <div>
+                        <label for="login-email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+                        <input type="email" id="login-email" class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-400" placeholder="your@example.com" required>
+                    </div>
+                    <div>
+                        <label for="login-password" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
+                        <input type="password" id="login-password" class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-400" placeholder="********" required>
+                    </div>
+                    <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-full w-full transition duration-300 shadow-lg transform hover:scale-105">Login</button>
+                </form>
+
+                <form id="signup-form" class="space-y-6 hidden">
+                    <input type="hidden" id="signup-role-input" value="customer">
+                    <div>
+                        <label for="signup-username" class="block text-gray-700 text-sm font-bold mb-2">Username:</label>
+                        <input type="text" id="signup-username" class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-400" placeholder="Your Username" required>
+                    </div>
+                    <div>
+                        <label for="signup-email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+                        <input type="email" id="signup-email" class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-400" placeholder="your@example.com" required>
+                    </div>
+                    <div>
+                        <label for="signup-password" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
+                        <input type="password" id="signup-password" class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-400" placeholder="********" required>
+                    </div>
+                    <div>
+                        <label for="signup-confirm-password" class="block text-gray-700 text-sm font-bold mb-2">Confirm Password:</label>
+                        <input type="password" id="signup-confirm-password" class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-400" placeholder="********" required>
+                    </div>
+                    <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-full w-full transition duration-300 shadow-lg transform hover:scale-105">Signup</button>
+                </form>
+                <p id="auth-message" class="text-center text-sm mt-4 text-red-500"></p>
+                <button id="back-to-roles" class="text-gray-500 hover:text-teal-600 mt-4"><i class="fas fa-arrow-left mr-1"></i> Back to Role Selection</button>
+            </div>
+        </section>
+
+        <section id="about-page" class="page-section bg-white rounded-lg shadow-xl p-8 mb-8">
+            <h2 class="text-4xl font-bold text-teal-700 mb-6 text-center">About Us</h2>
+            <div class="prose max-w-3xl mx-auto text-gray-700 text-lg leading-relaxed">
+                <p class="mb-4">Welcome to E-Pharmacy, your reliable partner in health and wellness. Established with a vision to make healthcare accessible and convenient, we bring a comprehensive range of pharmaceutical products, over-the-counter medicines, and personal care items right to your fingertips.</p>
+                <p class="mb-4">At E-Pharmacy, we prioritize your health and safety. All our products are sourced from certified manufacturers and suppliers, ensuring the highest quality and authenticity. Our platform is designed for ease of use, allowing you to browse, select, and order products with just a few clicks.</p>
+                <p class="mb-4">We are committed to innovation, which is why we've integrated cutting-edge cryptocurrency payment options, providing you with secure and private transaction alternatives. Our dedicated team is always here to assist you, ensuring a seamless and satisfactory shopping experience.</p>
+                <p>Thank you for choosing E-Pharmacy. We look forward to serving your healthcare needs.</p>
+            </div>
+        </section>
+
+        <section id="products-page" class="page-section bg-white rounded-lg shadow-xl p-8 mb-8">
+            <h2 class="text-4xl font-bold text-teal-700 mb-6 text-center">Our Products</h2>
+            <div id="product-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 product-grid-container max-h-[70vh] overflow-y-auto p-4">
+                </div>
+        </section>
+
+        <section id="cart-page" class="page-section bg-white rounded-lg shadow-xl p-8 mb-8">
+            <h2 class="text-4xl font-bold text-teal-700 mb-6 text-center">Your Shopping Cart</h2>
+            <div id="cart-items" class="space-y-4">
+                <p id="empty-cart-message" class="text-center text-gray-600 text-lg hidden">Your cart is empty.</p>
+            </div>
+            <div id="cart-summary" class="mt-8 pt-4 border-t-2 border-teal-200 flex justify-between items-center text-2xl font-bold text-teal-800">
+                <span>Total:</span>
+                <span id="cart-total">$0.00</span>
+            </div>
+            <div class="mt-8 flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4">
+                <button class="bg-gray-300 text-gray-800 px-6 py-3 rounded-full font-semibold hover:bg-gray-400 transition duration-300 shadow-md" onclick="showPage('products-page')">Continue Shopping</button>
+                <button id="checkout-button" class="bg-teal-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-teal-700 transition duration-300 shadow-lg transform hover:scale-105">Proceed to Checkout</button>
+            </div>
+        </section>
+
+        <section id="contact-page" class="page-section bg-white rounded-lg shadow-xl p-8 mb-8">
+            <h2 class="text-4xl font-bold text-teal-700 mb-6 text-center">Contact Us</h2>
+            <div class="prose max-w-3xl mx-auto text-gray-700 text-lg leading-relaxed">
+                <p class="mb-4">Have questions or need assistance? Our dedicated customer support team is here to help you.</p>
+                <p class="mb-4 text-center text-xl font-semibold text-teal-800">24/7 Customer Care Support Available!</p>
+                <p class="mb-4">You can reach us through the following methods:</p>
+                <ul class="list-disc list-inside mb-4">
+                    <li>Email: <a href="mailto:support@epharmacy.com" class="text-teal-600 hover:underline">support@epharmacy.com</a></li>
+                    <li>Phone: +1 (800) 123-4567</li>
+                    <li>Live Chat: Available on our homepage (simulated)</li>
+                </ul>
+                <p>Alternatively, fill out the form below and we will get back to you as soon as possible.</p>
+            </div>
+            <form class="space-y-6 mt-8">
+                <div>
+                    <label for="contact-name" class="block text-gray-700 text-sm font-bold mb-2">Name:</label>
+                    <input type="text" id="contact-name" class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-400" placeholder="Your Name" required>
+                </div>
+                <div>
+                    <label for="contact-email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+                    <input type="email" id="contact-email" class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-400" placeholder="your@example.com" required>
+                </div>
+                <div>
+                    <label for="contact-message" class="block text-gray-700 text-sm font-bold mb-2">Message:</label>
+                    <textarea id="contact-message" rows="5" class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-400" placeholder="Your message..." required></textarea>
+                </div>
+                <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-full w-full transition duration-300 shadow-lg transform hover:scale-105">Send Message</button>
+            </form>
+        </section>
+
+        <section id="wallet-page" class="page-section bg-white rounded-lg shadow-xl p-8 mb-8 max-w-2xl mx-auto text-center">
+            <h2 class="text-4xl font-bold text-teal-700 mb-6">My Wallet</h2>
+            <p class="text-lg text-gray-700 mb-6">This section will display your integrated cryptocurrency wallet, showing your balances and transaction history. For a real application, this would connect to a secure wallet service or blockchain node.</p>
+            <div class="bg-teal-50 p-6 rounded-lg shadow-md mb-6">
+                <p class="text-xl font-semibold text-teal-800 mb-2">Current Balance (Simulated):</p>
+                <p class="text-4xl font-bold text-teal-600"><span id="wallet-balance-usd">0.00</span> USD</p>
+                <p class="text-4xl font-bold text-teal-600"><span id="wallet-balance-btc">0.00</span> BTC</p>
+                <p class="text-4xl font-bold text-teal-600"><span id="wallet-balance-eth">0.00</span> ETH</p>
+            </div>
+            <p class="text-gray-600">Future features here would include deposit, withdraw, and transaction history viewing.</p>
+            
+            <div class="mt-6 flex flex-col items-center space-y-4">
+                <div class="flex items-center space-x-2 w-full max-w-sm">
+                    <input type="number" id="deposit-amount-input" class="shadow appearance-none border rounded-lg flex-grow py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Amount to deposit (USD)" min="0.01" step="0.01">
+                    <button id="deposit-button" class="bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition duration-300 shadow-lg transform hover:scale-105">Deposit</button>
+                </div>
+                <button id="quick-payment-button" class="bg-purple-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-purple-700 transition duration-300 shadow-lg transform hover:scale-105 w-full max-w-sm">Make a Quick Payment</button>
+                <button class="bg-teal-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-teal-700 transition duration-300 shadow-lg transform hover:scale-105 w-full max-w-sm" onclick="showPage('home-page')">Back to Home</button>
+            </div>
+        </section>
+
+        <section id="order-tracking-page" class="page-section bg-white rounded-lg shadow-xl p-8 mb-8 max-w-xl mx-auto">
+            <h2 class="text-4xl font-bold text-teal-700 mb-6 text-center">Track Your Order</h2>
+            <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
+                <input type="text" id="order-id-input" class="shadow appearance-none border rounded-lg flex-grow py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-400" placeholder="Enter Order ID (e.g., 12345)">
+                <button id="track-order-button" class="bg-teal-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-teal-700 transition duration-300 shadow-lg transform hover:scale-105">Track Order</button>
+            </div>
+            <div id="order-status-display" class="bg-teal-50 p-6 rounded-lg shadow-inner text-center hidden">
+                <p class="text-xl font-semibold text-teal-800 mb-2">Order ID: <span id="displayed-order-id" class="font-bold"></span></p>
+                <p class="text-2xl font-bold text-gray-800">Status: <span id="displayed-order-status" class="text-green-600"></span></p>
+                <p id="order-details-message" class="text-gray-600 mt-4"></p>
+            </div>
+            <p id="order-tracking-message" class="text-center text-sm mt-4 text-red-500 hidden"></p>
+        </section>
+
+        <section id="recent-orders-page" class="page-section bg-white rounded-lg shadow-xl p-8 mb-8">
+            <h2 class="text-4xl font-bold text-teal-700 mb-6 text-center">Your Recent Orders</h2>
+            <div id="recent-orders-list" class="space-y-6">
+                <p id="no-recent-orders-message" class="text-center text-gray-600 text-lg hidden">You have no recent orders.</p>
+                </div>
+        </section>
+
+        <section id="checkout-page" class="page-section bg-white rounded-lg shadow-xl p-8 mb-8 max-w-2xl mx-auto">
+            <h2 class="text-4xl font-bold text-teal-700 mb-6 text-center">Checkout</h2>
+            <form id="checkout-form" class="space-y-6">
+                <h3 class="text-2xl font-bold text-teal-600 mb-4">Shipping Information</h3>
+                <div>
+                    <label for="full-name" class="block text-gray-700 text-sm font-bold mb-2">Full Name:</label>
+                    <input type="text" id="full-name" class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-400" required>
+                </div>
+                <div>
+                    <label for="address" class="block text-gray-700 text-sm font-bold mb-2">Address:</label>
+                    <input type="text" id="address" class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-400" required>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="city" class="block text-gray-700 text-sm font-bold mb-2">City:</label>
+                        <input type="text" id="city" class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-400" required>
+                    </div>
+                    <div>
+                        <label for="zip-code" class="block text-gray-700 text-sm font-bold mb-2">Zip Code:</label>
+                        <input type="text" id="zip-code" class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-400" required>
+                    </div>
+                </div>
+                <div>
+                    <label for="country" class="block text-gray-700 text-sm font-bold mb-2">Country:</label>
+                    <input type="text" id="country" class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-400" required>
+                </div>
+                <div id="checkout-total-display" class="text-right text-2xl font-bold text-teal-800 mt-8">
+                    Order Total: <span id="checkout-total-amount">$0.00</span>
+                </div>
+                <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-full w-full transition duration-300 shadow-lg transform hover:scale-105">Proceed to Payment</button>
+            </form>
+        </section>
+        
+        <section id="payment-selection-page" class="page-section bg-white rounded-lg shadow-xl p-8 mb-8 max-w-2xl mx-auto">
+            <h2 class="text-4xl font-bold text-teal-700 mb-6 text-center">Select Payment Method</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <button id="btn-pay-crypto" class="btn-crypto btn-payment-method active" data-method="crypto">
+                    <span class="cryptocurrency-icon bg-orange-500"><i class="fas fa-coins"></i></span>
+                    <h3 class="text-xl font-semibold text-gray-800 mt-4">Cryptocurrency</h3>
+                    <p class="text-sm text-gray-600">Pay directly from your crypto wallet.</p>
+                </button>
+                <button id="btn-pay-wallet" class="btn-crypto btn-payment-method" data-method="wallet">
+                    <span class="cryptocurrency-icon bg-teal-600"><i class="fas fa-wallet"></i></span>
+                    <h3 class="text-xl font-semibold text-gray-800 mt-4">Wallet Balance</h3>
+                    <p class="text-sm text-gray-600">Use your E-Pharmacy wallet balance.</p>
+                </button>
+            </div>
+
+            <div id="crypto-grid">
+                <h3 class="text-2xl font-bold text-teal-700 mb-6 text-center">Choose a Cryptocurrency</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <button class="btn-crypto btn-cryptocurrency active" data-crypto="btc">
+                        <span class="cryptocurrency-icon bg-orange-400">BTC</span>
+                        <p class="mt-2 text-md font-semibold text-gray-700">Bitcoin</p>
+                    </button>
+                    <button class="btn-crypto btn-cryptocurrency" data-crypto="eth">
+                        <span class="cryptocurrency-icon bg-blue-500">ETH</span>
+                        <p class="mt-2 text-md font-semibold text-gray-700">Ethereum</p>
+                    </button>
+                    <button class="btn-crypto btn-cryptocurrency" data-crypto="spk">
+                        <span class="cryptocurrency-icon bg-yellow-500">SPK</span>
+                        <p class="mt-2 text-md font-semibold text-gray-700">Spark Coin</p>
+                    </button>
+                    <button class="btn-crypto btn-cryptocurrency" data-crypto="pm">
+                        <span class="cryptocurrency-icon bg-gray-900">PM</span>
+                        <p class="mt-2 text-md font-semibold text-gray-700">Perfect Money</p>
+                    </button>
+                    <button class="btn-crypto btn-cryptocurrency" data-crypto="doge">
+                        <span class="cryptocurrency-icon bg-amber-400">DOGE</span>
+                        <p class="mt-2 text-md font-semibold text-gray-700">Dogecoin</p>
+                    </button>
+                    <button class="btn-crypto btn-cryptocurrency" data-crypto="xrp">
+                        <span class="cryptocurrency-icon bg-gray-900">XRP</span>
+                        <p class="mt-2 text-md font-semibold text-gray-700">XRP</p>
+                    </button>
+                    <button class="btn-crypto btn-cryptocurrency" data-crypto="blx">
+                        <span class="cryptocurrency-icon bg-teal-600">BLX</span>
+                        <p class="mt-2 text-md font-semibold text-gray-700">Blendex Coin</p>
+                    </button>
+                    <button class="btn-crypto btn-cryptocurrency" data-crypto="ltc">
+                        <span class="cryptocurrency-icon bg-blue-400">LTC</span>
+                        <p class="mt-2 text-md font-semibold text-gray-700">Litecoin</p>
+                    </button>
+                    <button class="btn-crypto btn-cryptocurrency" data-crypto="xrp_alt">
+                        <span class="cryptocurrency-icon bg-teal-600">XRP</span>
+                        <p class="mt-2 text-md font-semibold text-gray-700">Ripple</p>
+                    </button>
+                    <button class="btn-crypto btn-cryptocurrency" data-crypto="usdc">
+                        <span class="cryptocurrency-icon bg-blue-600">USDC</span>
+                        <p class="mt-2 text-md font-semibold text-gray-700">USD Coin</p>
+                    </button>
+                    <button class="btn-crypto btn-cryptocurrency" data-crypto="usdt">
+                        <span class="cryptocurrency-icon bg-green-500">USDT</span>
+                        <p class="mt-2 text-md font-semibold text-gray-700">Tethercoin</p>
+                    </button>
+                </div>
+            </div>
+            
+            <button id="pay-now-button" class="bg-teal-600 text-white px-8 py-4 rounded-full text-xl font-semibold hover:bg-teal-700 transition duration-300 shadow-lg transform hover:scale-105 w-full mt-8 hidden">Pay Now</button>
+        </section>
+
+        <section id="transaction-page" class="page-section bg-white rounded-lg shadow-xl p-8 mb-8 max-w-md mx-auto text-center">
+            <h2 class="text-4xl font-bold text-teal-700 mb-6">Processing Your Order...</h2>
+            <div class="flex justify-center items-center mb-6">
+                <i class="fas fa-spinner fa-spin text-6xl text-teal-600"></i>
+            </div>
+            <p class="text-lg text-gray-700">Please wait while we process your transaction. This may take a few moments.</p>
+            <p class="text-sm text-gray-500 mt-4">Do not close this window.</p>
+        </section>
+
+        <section id="crypto-payment-page" class="page-section bg-white rounded-lg shadow-xl p-8 mb-8 max-w-xl mx-auto text-center">
+            <h2 class="text-4xl font-bold text-teal-700 mb-6">Complete Your Payment</h2>
+            <p class="text-lg text-gray-700 mb-6">Please send <span id="crypto-amount" class="font-bold text-teal-600">0.00 BTC</span> to the address below.</p>
+            <div class="bg-gray-100 p-6 rounded-lg shadow-inner mb-6">
+                <p class="text-xl font-semibold text-gray-800 mb-2">Bitcoin Address:</p>
+                <div class="flex items-center justify-center space-x-2">
+                    <span id="bitcoin-address" class="text-xl font-mono text-gray-900 break-all">1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa</span>
+                    <button class="copy-button text-teal-600 hover:text-teal-800 transition duration-300" data-copy-target="bitcoin-address">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <div id="qrcode-container" class="mx-auto my-4 rounded-md shadow-sm flex justify-center items-center">
+                    <canvas id="qrcode-canvas"></canvas>
+                </div>
+                <p class="text-sm text-gray-600">Scan QR code or copy address to send payment.</p>
+            </div>
+            <p class="text-md text-gray-700 mb-6">Once payment is confirmed on the blockchain, your order will be completed.</p>
+            <button id="simulate-crypto-payment" class="bg-teal-600 text-white px-8 py-4 rounded-full text-xl font-semibold hover:bg-teal-700 transition duration-300 shadow-lg transform hover:scale-105">Simulate Payment Confirmation</button>
+            <p id="payment-status-message" class="text-center text-sm mt-4 text-green-600 hidden"></p>
+        </section>
+
+        <section id="fiat-payment-page" class="page-section bg-white rounded-lg shadow-xl p-8 mb-8 max-w-md mx-auto text-center">
+            <h2 class="text-4xl font-bold text-teal-700 mb-6">Simulating Fiat Payment...</h2>
+            <div class="flex justify-center items-center mb-6">
+                <i class="fas fa-credit-card text-6xl text-teal-600"></i>
+            </div>
+            <p class="text-lg text-gray-700">Your payment via Fiat Currency is being processed.</p>
+            <p class="text-sm text-gray-500 mt-4">In a real application, this would involve a secure payment gateway redirect.</p>
+            <button id="simulate-fiat-payment" class="bg-teal-600 text-white px-8 py-4 rounded-full text-xl font-semibold hover:bg-teal-700 transition duration-300 shadow-lg transform hover:scale-105 mt-6">Simulate Payment Success</button>
+            <p id="fiat-payment-status-message" class="text-center text-sm mt-4 text-green-600 hidden"></p>
+        </section>
+
+        <section id="order-complete-page" class="page-section bg-white rounded-lg shadow-xl p-8 mb-8 max-w-md mx-auto text-center">
+            <h2 class="text-4xl font-bold text-teal-700 mb-6">Order Placed Successfully!</h2>
+            <i class="fas fa-check-circle text-8xl text-green-500 mb-6 animate-bounce-in"></i>
+            <p class="text-lg text-gray-700 mb-8">Thank you for your purchase. Your order has been successfully placed and will be processed shortly.</p>
+            <div id="billing-details-display" class="bg-gray-100 p-4 rounded-lg shadow-inner mt-6 text-left">
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">Billing Details:</h3>
+                <p><strong>Full Name:</strong> <span id="billing-full-name"></span></p>
+                <p><strong>Address:</strong> <span id="billing-address"></span></p>
+                <p><strong>City:</strong> <span id="billing-city"></span></p>
+                <p><strong>Zip Code:</strong> <span id="billing-zip-code"></span></p>
+                <p><strong>Country:</strong> <span id="billing-country"></span></p>
+                <p class="mt-2"><strong>Payment Method:</strong> <span id="billing-payment-method"></span></p>
+                <p class="text-lg font-bold mt-2"><strong>Total Paid:</strong> <span id="billing-total-paid"></span></p>
+            </div>
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mt-8">
+                <button class="bg-teal-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-teal-700 transition duration-300 shadow-lg transform hover:scale-105" onclick="showPage('products-page')">Continue Shopping</button>
+                <button class="bg-gray-300 text-gray-800 px-6 py-3 rounded-full font-semibold hover:bg-gray-400 transition duration-300 shadow-md" onclick="showPage('home-page')">Back to Home</button>
+            </div>
+        </section>
+
+        <section id="order-details-page" class="page-section bg-white rounded-lg shadow-xl p-8 mb-8 max-w-2xl mx-auto">
+            <h2 class="text-4xl font-bold text-teal-700 mb-6

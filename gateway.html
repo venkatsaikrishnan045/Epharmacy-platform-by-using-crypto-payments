@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CryptoPay Gateway</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .page-section {
+      display: none;
+    }
+    .page-section.active {
+      display: block;
+    }
+    .sidebar-nav-link.active {
+      background-color: #4f46e5;
+      color: white;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .sidebar-nav-link.active .icon-bg {
+      background-color: white;
+      color: #4f46e5;
+    }
+    @media (max-width: 768px) {
+        .main-content {
+            padding-bottom: 5rem;
+        }
+    }
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    .animate-spin-custom {
+        animation: spin 1s linear infinite;
+    }
+    .shake-animation {
+      animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+      transform: translate3d(0, 0, 0);
+      backface-visibility: hidden;
+      perspective: 1000px;
+    }
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(2px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+      40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-800 antialiased flex flex-col md:flex-row">
+
+  <!-- Sidebar Navigation -->
+  <nav class="bg-white shadow-xl md:w-64 p-6 flex flex-col justify-between fixed md:relative bottom-0 left-0 right-0 z-50 md:z-auto md:h-screen">
+    <div class="flex flex-col space-y-4 md:space-y-6">
+      <div class="flex items-center space-x-3 mb-6">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-coins h-8 w-8 text-indigo-600"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
+        <span class="text-3xl font-extrabold text-indigo-900">CryptoPay</span>
+      </div>
+      <button id="nav-home" class="sidebar-nav-link flex items-center space-x-4 p-3 rounded-xl transition-all duration-300 text-gray-500 hover:bg-gray-100 active">
+        <div class="icon-bg p-2 rounded-lg bg-gray-100 text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+        </div>
+        <span class="font-medium text-lg hidden md:block">Dashboard</span>
+      </button>
+      <button id="nav-about" class="sidebar-nav-link flex items-center space-x-4 p-3 rounded-xl transition-all duration-300 text-gray-500 hover:bg-gray-100">
+        <div class="icon-bg p-2 rounded-lg bg-gray-100 text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-panel-left"><rect width="7" height="18" x="3" y="3" rx="1"/><rect width="11" height="18" x="10" y="3" rx="1"/></svg>
+        </div>
+        <span class="font-medium text-lg hidden md:block">About Us</span>
+      </button>
+      <button id="nav-services" class="sidebar-nav-link flex items-center space-x-4 p-3 rounded-xl transition-all duration-300 text-gray-500 hover:bg-gray-100">
+        <div class="icon-bg p-2 rounded-lg bg-gray-100 text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.78 1.35a2 2 0 0 0 .73 2.73l.15.08a2 2 0 0 1 1 1.73v.54a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.78 1.35a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2-0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.78-1.35a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.73v-.54a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.78-1.35a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <span class="font-medium text-lg hidden md:block">Services</span>
+      </button>
+      <button id="nav-contact" class="sidebar-nav-link flex items-center space-x-4 p-3 rounded-xl transition-all duration-300 text-gray-500 hover:bg-gray-100">
+        <div class="icon-bg p-2 rounded-lg bg-gray-100 text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-help"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        </div>
+        <span class="font-medium text-lg hidden md:block">Contact</span>
+      </button>
+    </div>
+    <div class="mt-8 hidden md:block">
+      <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-lg">
+        <h3 class="text-lg font-semibold text-indigo-800">Need Help?</h3>
+        <p class="text-sm text-indigo-700 mt-1">Contact our support team for any assistance.</p>
+        <button class="mt-3 px-4 py-2 bg-indigo-500 text-white text-sm rounded-md shadow-md hover:bg-indigo-600 transition-colors">
+          Get Support
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="main-content flex-1 p-4 md:p-10 overflow-auto">
+    <header class="mb-8">
+      <h1 id="page-title" class="text-4xl font-bold text-gray-900">Payment Gateway</h1>
+      <p id="page-subtitle" class="text-gray-500 mt-2">Experience seamless payments with CryptoPay.</p>
+    </header>
+    <div class="bg-white p-6 md:p-10 rounded-3xl shadow-2xl">
+      <!-- Home Page (Payment Simulation) -->
+      <section id="home-page" class="page-section active">
+        <div class="grid md:grid-cols-2 gap-8">
+          <!-- Payment Form -->
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Start a New Payment</h2>
+            <form id="payment-form" class="space-y-6">
+              <div>
+                <label for="amount" class="block text-sm font-medium text-gray-700">Payment Amount</label>
+                <div class="mt-1 relative rounded-md shadow-sm">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="text-gray-500">$</span>
+                  </div>
+                  <input type="number" name="amount" id="amount" class="block w-full rounded-md border-gray-300 pl-7 pr-12 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="0.00" />
+                  <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <span class="text-gray-500 sm:text-sm">USD</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select Payment Method</label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <button type="button" class="payment-method-btn p-4 flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 border-indigo-600 bg-indigo-50 shadow-lg scale-105" data-method="bitcoin">
+                    <div class="icon-bg h-12 w-12 flex items-center justify-center rounded-full bg-indigo-600 text-white">
+                      <!-- Bitcoin Icon -->
+                      <svg href="qrscan.jpg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bitcoin"><path d="M11.767 19.083c-1.33-1.34-2.22-2.9-2.22-4.14 0-.84.66-1.5 1.5-1.5.9 0 1.5.67 1.5 1.5 0 .2-.11.45-.19.64.08.06.18.11.28.16.51.27 1.01.27 1.52 0 .5-.27.78-.54.78-1.07 0-.75-.68-1.35-1.5-1.35-.48 0-.97.18-1.38.45-.09-.32-.19-.66-.19-.89 0-1.02.77-1.85 1.8-1.85.83 0 1.34.34 1.63.67.24.27.42.59.42.94 0 .97-1.05 1.4-1.84 2.1-.47.41-.83.85-.83 1.42 0 .73.54 1.15 1.15 1.15.52 0 1.05-.22 1.44-.55.1-.09.2-.18.3-.27.08.4.15.82.15 1.25 0 2.22-1.6 3.82-3.8 3.82-1.92 0-3.32-1.2-3.32-3.2 0-.82.4-1.5.9-2.07.1-.11.19-.22.28-.33-.3-.15-.65-.24-1-.24-1.53 0-2.58 1.16-2.58 2.76 0 .6.15 1.2.45 1.7.5.88 1.2 1.63 2.1 2.26.17.1.34.18.5.25.26.13.56.2.86.25l-.01.01h.01c.2 0 .42-.03.62-.08.74-.2 1.37-.47 1.77-.73.4-.26.68-.5.68-.82 0-.46-.37-.77-1-.96-.46-.15-.96-.28-1.5-.4-1.25-.26-2.06-.5-2.06-1.4 0-.58.37-.89 1-.89.37 0 .7.12.98.34.2.16.4.37.58.62.2.27.4.5.6.7zM11 12c.5 0 .8.2.8.5v2.2c0 .2-.1.3-.2.3H11V12zm2 0h1v2.5h-1V12z"/><path d="M12 2a10 10 0 1 0 0 20 10 10 0 1 0 0-20z"/></svg>
+                    </div>
+                    <span class="mt-2 text-center text-sm font-medium">Bitcoin</span>
+                  </button>
+                  <button type="button" class="payment-method-btn p-4 flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 border-gray-200 hover:border-indigo-400" data-method="ethereum">
+                    <div class="icon-bg h-12 w-12 flex items-center justify-center rounded-full bg-gray-100 text-gray-500">
+                      <!-- Ethereum Icon -->
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ethereum"><path d="M6.712 12.001 12 21.001l5.288-9.001L12 3.001l-5.288 9z"/><path d="m12 13 5.288-9-5.288-1z"/><path d="m12 13-5.288-9 5.288-1z"/><path d="M12 13.001 6.712 21.001 12 18.001z"/><path d="M12 13.001 17.288 21.001 12 18.001z"/></svg>
+                    </div>
+                    <span class="mt-2 text-center text-sm font-medium">Ethereum</span>
+                  </button>
+                  <button type="button" class="payment-method-btn p-4 flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 border-gray-200 hover:border-indigo-400" data-method="sparkcoin">
+                    <div class="icon-bg h-12 w-12 flex items-center justify-center rounded-full bg-gray-100 text-gray-500">
+                      <!-- SparkCoin Icon (using a gem) -->
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gem"><path d="M6 3v5c0 .6-.4 1-1 1H1"/><path d="M18 3v5c0 .6.4 1 1 1h4"/><path d="M22 9 12 2l-10 7L12 22Z"/><path d="m22 9-10 7-10-7"/></svg>
+                    </div>
+                    <span class="mt-2 text-center text-sm font-medium">SparkCoin</span>
+                  </button>
+                  <button type="button" class="payment-method-btn p-4 flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 border-gray-200 hover:border-indigo-400" data-method="perfectmoney">
+                    <div class="icon-bg h-12 w-12 flex items-center justify-center rounded-full bg-gray-100 text-gray-500">
+                      <!-- Perfect Money Icon -->
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-banknote"><rect width="20" height="12" x="2" y="6" rx="3"/><path d="M6 18h11a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2z"/><line x1="10" x2="10" y1="12" y2="12"/></svg>
+                    </div>
+                    <span class="mt-2 text-center text-sm font-medium">Perfect Money</span>
+                  </button>
+                  <button type="button" class="payment-method-btn p-4 flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 border-gray-200 hover:border-indigo-400" data-method="paypal">
+                    <div class="icon-bg h-12 w-12 flex items-center justify-center rounded-full bg-gray-100 text-gray-500">
+                      <!-- PayPal Icon -->
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-wallet"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+                    </div>
+                    <span class="mt-2 text-center text-sm font-medium">PayPal</span>
+                  </button>
+                  <button type="button" class="payment-method-btn p-4 flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 border-gray-200 hover:border-indigo-400" data-method="wallet">
+                    <div class="icon-bg h-12 w-12 flex items-center justify-center rounded-full bg-gray-100 text-gray-500">
+                      <!-- Generic Wallet Icon -->
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                    </div>
+                    <span class="mt-2 text-center text-sm font-medium">Wallet</span>
+                  </button>
+                  <button type="button" class="payment-method-btn p-4 flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 border-gray-200 hover:border-indigo-400" data-method="forex">
+                    <div class="icon-bg h-12 w-12 flex items-center justify-center rounded-full bg-gray-100 text-gray-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 0 4 10a15.3 15.3 0 0 0-4 10a15.3 15.3 0 0 0-4-10a15.3 15.3 0 0 0 4-10z"/><line x1="2" x2="22" y1="12" y2="12"/></svg>
+                    </div>
+                    <span class="mt-2 text-center text-sm font-medium">Forex Cards</span>
+                  </button>
+                  <button type="button" class="payment-method-btn p-4 flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 border-gray-200 hover:border-indigo-400" data-method="card">
+                    <div class="icon-bg h-12 w-12 flex items-center justify-center rounded-full bg-gray-100 text-gray-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                    </div>
+                    <span class="mt-2 text-center text-sm font-medium">Credit & Debit Cards</span>
+                  </button>
+                </div>
+              </div>
+              <button type="submit" id="pay-now-btn" class="w-full flex items-center justify-center space-x-2 px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 transition-colors">
+                <span>Pay Now</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </button>
+            </form>
+          </div>
+
+          <!-- Payment Status & Summary -->
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Payment Status</h2>
+            <div id="payment-status-box" class="bg-indigo-50 border border-indigo-200 p-8 rounded-3xl shadow-inner">
+              <!-- Initial Status -->
+              <div id="status-pending" class="text-center text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard mx-auto h-16 w-16 text-indigo-400 mb-4"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                <p class="text-lg font-medium">Waiting for payment initiation...</p>
+              </div>
+
+              <!-- Processing Status -->
+              <div id="status-processing" class="text-center text-indigo-600 hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-loader-2 mx-auto h-16 w-16 animate-spin-custom mb-4"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                <p class="text-lg font-medium">Processing your payment securely...</p>
+              </div>
+
+              <!-- Success Status -->
+              <div id="status-success" class="text-center text-green-600 hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle mx-auto h-16 w-16 text-green-500 mb-4"><path d="M22 11.08V12a10 10 0 1 1-5.93-8.5"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <h3 class="text-2xl font-bold">Payment Successful!</h3>
+                <p class="mt-2 text-gray-600">Your transaction has been completed.</p>
+              </div>
+
+              <!-- Error Status -->
+              <div id="status-error" class="text-center text-red-600 hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-circle mx-auto h-16 w-16 text-red-500 mb-4 shake-animation"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                <h3 class="text-2xl font-bold">Payment Failed</h3>
+                <p id="error-message" class="mt-2 text-gray-600">Please try again later.</p>
+              </div>
+
+              <!-- QR Code Payment UI -->
+              <div id="status-qr-code" class="text-center hidden">
+                <h3 id="qr-title" class="text-2xl font-bold text-gray-900 mb-4">Scan to Pay</h3>
+                <p class="text-sm text-gray-600 mb-4">Please use your app to scan the QR code and complete the payment.</p>
+                <img id="qr-image" src="https://placehold.co/200x200/4f46e5/ffffff?text=QR+Code" alt="QR Code" class="mx-auto rounded-lg shadow-lg mb-4" />
+                <p id="qr-amount" class="text-xl font-semibold text-gray-800 mb-4"></p>
+                <button type="button" id="confirm-qr-payment" class="w-full flex items-center justify-center space-x-2 px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 transition-colors">
+                    <span>I Have Paid</span>
+                </button>
+              </div>
+
+              <!-- Card Payment UI -->
+              <div id="status-card-details" class="hidden">
+                  <h3 class="text-2xl font-bold text-gray-900 mb-4">Enter Card Details</h3>
+                  <form id="card-form" class="space-y-4">
+                      <div>
+                          <label for="card-number" class="block text-sm font-medium text-gray-700">Card Number</label>
+                          <input type="text" id="card-number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="0000 0000 0000 0000" />
+                      </div>
+                      <div class="grid grid-cols-2 gap-4">
+                          <div>
+                              <label for="expiry" class="block text-sm font-medium text-gray-700">Expiry (MM/YY)</label>
+                              <input type="text" id="expiry" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="MM/YY" />
+                          </div>
+                          <div>
+                              <label for="cvv" class="block text-sm font-medium text-gray-700">CVV</label>
+                              <input type="text" id="cvv" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="CVV" />
+                          </div>
+                      </div>
+                      <button type="submit" id="confirm-card-payment" class="w-full flex items-center justify-center space-x-2 px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 transition-colors">
+                          <span>Pay with Card</span>
+                      </button>
+                  </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- About Page -->
+      <section id="about-page" class="page-section">
+        <div class="space-y-8">
+          <div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Our Story</h2>
+            <p id="about-us-text" class="text-gray-600 leading-relaxed max-w-2xl">Loading company information...</p>
+          </div>
+          <div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Our Values</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+              <div class="flex flex-col items-center text-center p-6 bg-gray-50 rounded-2xl shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check h-12 w-12 text-blue-500"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.7-0C6.5 20.5 3 18 3 13V6a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/><path d="m9 12 2 2 4-4"/></svg>
+                <h3 class="mt-4 text-xl font-semibold text-gray-800">Security First</h3>
+                <p class="mt-2 text-sm text-gray-600">We use state-of-the-art encryption and blockchain technology to protect every transaction.</p>
+              </div>
+              <div class="flex flex-col items-center text-center p-6 bg-gray-50 rounded-2xl shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap h-12 w-12 text-yellow-500"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <h3 class="mt-4 text-xl font-semibold text-gray-800">Blazing Fast</h3>
+                <p class="mt-2 text-sm text-gray-600">Our platform is optimized for speed, ensuring your payments are processed instantly.</p>
+              </div>
+              <div class="flex flex-col items-center text-center p-6 bg-gray-50 rounded-2xl shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-coins h-12 w-12 text-green-500"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>
+                <h3 class="mt-4 text-xl font-semibold text-gray-800">Global Reach</h3>
+                <p class="mt-2 text-sm text-gray-600">Transact in any currency, anywhere in the world, with minimal fees and no borders.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Services Page -->
+      <section id="services-page" class="page-section">
+        <div class="space-y-8">
+          <div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Our Core Offerings</h2>
+            <p id="services-text" class="text-gray-600 leading-relaxed max-w-2xl">Loading service descriptions...</p>
+          </div>
+          <div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">How It Works</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+              <div class="flex p-6 space-x-4 bg-indigo-50 rounded-2xl shadow-inner">
+                <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-indigo-600 text-white font-bold text-xl rounded-full">1</div>
+                <div>
+                  <h3 class="text-xl font-semibold text-gray-800">Integrate</h3>
+                  <p class="mt-1 text-sm text-gray-600">Easily integrate our API into your website or app with our comprehensive documentation.</p>
+                </div>
+              </div>
+              <div class="flex p-6 space-x-4 bg-indigo-50 rounded-2xl shadow-inner">
+                <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-indigo-600 text-white font-bold text-xl rounded-full">2</div>
+                <div>
+                  <h3 class="text-xl font-semibold text-gray-800">Accept Payments</h3>
+                  <p class="mt-1 text-sm text-gray-600">Your customers can pay with their preferred crypto or traditional fiat method securely.</p>
+                </div>
+              </div>
+              <div class="flex p-6 space-x-4 bg-indigo-50 rounded-2xl shadow-inner">
+                <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-indigo-600 text-white font-bold text-xl rounded-full">3</div>
+                <div>
+                  <h3 class="text-xl font-semibold text-gray-800">Settle Funds</h3>
+                  <p class="mt-1 text-sm text-gray-600">Receive funds instantly in your preferred currency, with transparent and low fees.</p>
+                </div>
+              </div>
+              <div class="flex p-6 space-x-4 bg-indigo-50 rounded-2xl shadow-inner">
+                <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-indigo-600 text-white font-bold text-xl rounded-full">4</div>
+                <div>
+                  <h3 class="text-xl font-semibold text-gray-800">Manage & Grow</h3>
+                  <p class="mt-1 text-sm text-gray-600">Use our dashboard to track transactions, manage finances, and gain valuable insights.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact Page -->
+      <section id="contact-page" class="page-section">
+        <div class="space-y-8">
+          <div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Get in Touch</h2>
+            <p class="text-gray-600 leading-relaxed max-w-2xl">
+              We're here to help you get started with our payment solutions. Fill out the form below or contact us using the details provided.
+            </p>
+          </div>
+          <div class="grid md:grid-cols-2 gap-8">
+            <!-- Contact Form -->
+            <form class="space-y-4">
+              <div>
+                <label for="contact-name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                <input type="text" id="contact-name" name="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+              </div>
+              <div>
+                <label for="contact-email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                <input type="email" id="contact-email" name="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
+              </div>
+              <div>
+                <label for="contact-message" class="block text-sm font-medium text-gray-700">Message</label>
+                <textarea id="contact-message" name="message" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+              </div>
+              <button type="submit" class="w-full md:w-auto px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 transition-colors">
+                Send Message
+              </button>
+            </form>
+            <!-- Contact Info -->
+            <div class="bg-indigo-50 p-6 rounded-2xl shadow-inner">
+              <h3 class="text-xl font-semibold text-gray-800">Company Details</h3>
+              <ul class="mt-4 space-y-2 text-gray-600">
+                <li><span class="font-medium text-gray-800">Address:</span> 123 Crypto Street, Blockchain City, 10001</li>
+                <li><span class="font-medium text-gray-800">Phone:</span> +1 (555) 123-4567</li>
+                <li><span class="font-medium text-gray-800">Email:</span> contact@cryptopay.com</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // Helper function for exponential backoff retry logic
+    const withExponentialBackoff = async (fn, maxRetries = 5, delay = 1000) => {
+        for (let i = 0; i < maxRetries; i++) {
+            try {
+                return await fn();
+            } catch (error) {
+                if (i < maxRetries - 1) {
+                    console.warn(`Attempt ${i + 1} failed. Retrying in ${delay / 1000}s...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                } else {
+                    throw error;
+                }
+            }
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const navButtons = document.querySelectorAll('.sidebar-nav-link');
+        const pages = document.querySelectorAll('.page-section');
+        const pageTitle = document.getElementById('page-title');
+        const pageSubtitle = document.getElementById('page-subtitle');
+        const paymentForm = document.getElementById('payment-form');
+        const amountInput = document.getElementById('amount');
+        const payNowBtn = document.getElementById('pay-now-btn');
+        const paymentMethodBtns = document.querySelectorAll('.payment-method-btn');
+        const statusBox = document.getElementById('payment-status-box');
+        const aboutUsTextEl = document.getElementById('about-us-text');
+        const servicesTextEl = document.getElementById('services-text');
+        const confirmQRBtn = document.getElementById('confirm-qr-payment');
+        const cardForm = document.getElementById('card-form');
+
+        let selectedMethod = 'bitcoin';
+        
+        // Function to handle page navigation
+        const navigateTo = (pageId) => {
+            pages.forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+
+            navButtons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`nav-${pageId.replace('-page', '')}`).classList.add('active');
+
+            switch (pageId) {
+                case 'home-page':
+                    pageTitle.textContent = 'Payment Gateway';
+                    pageSubtitle.textContent = 'Experience seamless payments with CryptoPay.';
+                    break;
+                case 'about-page':
+                    pageTitle.textContent = 'About Us';
+                    pageSubtitle.textContent = 'Learn more about our mission and vision.';
+                    break;
+                case 'services-page':
+                    pageTitle.textContent = 'Services';
+                    pageSubtitle.textContent = 'Explore the powerful features we offer.';
+                    break;
+                case 'contact-page':
+                    pageTitle.textContent = 'Contact';
+                    pageSubtitle.textContent = 'Get in touch with our team.';
+                    break;
+            }
+        };
+        
+        // Fetch company info from Gemini API
+        const fetchCompanyInfo = async () => {
+          try {
+            const fetchContent = async (prompt) => {
+              const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+              const payload = { contents: chatHistory };
+              const apiKey = "";
+              const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+              const response = await withExponentialBackoff(() =>
+                fetch(apiUrl, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(payload),
+                })
+              );
+              const result = await response.json();
+              return result?.candidates?.[0]?.content?.parts?.[0]?.text || 'Content could not be loaded.';
+            };
+            
+            const aboutPrompt = `Write a short, engaging "About Us" section for a fictional crypto payment gateway company called CryptoPay. Mention its mission to simplify global payments using blockchain technology and support for various payment methods. Do not exceed 100 words.`;
+            const servicesPrompt = `Describe the core services of a fictional crypto payment gateway company called CryptoPay. Focus on features like seamless integration, multiple currency support (crypto and fiat), and enhanced security. Do not exceed 150 words.`;
+
+            const [aboutText, servicesDesc] = await Promise.all([
+              fetchContent(aboutPrompt),
+              fetchContent(servicesPrompt)
+            ]);
+
+            aboutUsTextEl.textContent = aboutText;
+            servicesTextEl.textContent = servicesDesc;
+          } catch (error) {
+            console.error('Failed to fetch content:', error);
+            aboutUsTextEl.textContent = 'Failed to load company information. Please try again.';
+            servicesTextEl.textContent = 'Failed to load services. Please try again.';
+          }
+        };
+
+        // Event listeners for navigation
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const pageId = button.id.replace('nav-', '') + '-page';
+                navigateTo(pageId);
+            });
+        });
+
+        // Event listeners for payment methods
+        paymentMethodBtns.forEach(button => {
+            button.addEventListener('click', () => {
+                paymentMethodBtns.forEach(btn => {
+                    btn.classList.remove('active', 'border-indigo-600', 'bg-indigo-50', 'shadow-lg', 'scale-105');
+                    btn.classList.add('border-gray-200', 'hover:border-indigo-400');
+                    const iconBg = btn.querySelector('.icon-bg');
+                    if (iconBg) {
+                        iconBg.classList.remove('bg-indigo-600', 'text-white');
+                        iconBg.classList.add('bg-gray-100', 'text-gray-500');
+                    }
+                });
+                button.classList.remove('border-gray-200', 'hover:border-indigo-400');
+                button.classList.add('border-indigo-600', 'bg-indigo-50', 'shadow-lg', 'scale-105');
+                const iconBg = button.querySelector('.icon-bg');
+                if (iconBg) {
+                    iconBg.classList.remove('bg-gray-100', 'text-gray-500');
+                    iconBg.classList.add('bg-indigo-600', 'text-white');
+                }
+                selectedMethod = button.dataset.method;
+                updateStatus('pending');
+            });
+        });
+
+        // Function to update payment status UI
+        const updateStatus = (status, message = '') => {
+            const statuses = ['pending', 'processing', 'success', 'error', 'qr-code', 'card-details'];
+            statuses.forEach(s => {
+                const element = document.getElementById(`status-${s}`);
+                if (element) {
+                    element.classList.add('hidden');
+                }
+            });
+            document.getElementById(`status-${status}`).classList.remove('hidden');
+            if (status === 'error') {
+                document.getElementById('error-message').textContent = message;
+            } else if (status === 'success') {
+                const amount = parseFloat(amountInput.value).toFixed(2);
+                document.querySelector('#status-success p').innerHTML = `Your transaction of <span class="font-semibold">$${amount}</span> has been completed.`;
+            } else if (status === 'qr-code') {
+                const amount = parseFloat(amountInput.value).toFixed(2);
+                const coinName = selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1);
+                document.getElementById('qr-amount').textContent = `Amount: $${amount} USD`;
+                document.getElementById('qr-image').src = `https://placehold.co/200x200/4f46e5/ffffff?text=${coinName}`;
+                document.getElementById('qr-title').textContent = `Scan to Pay with ${coinName}`;
+            }
+        };
+
+        // Main form submit event
+        paymentForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const amount = parseFloat(amountInput.value);
+            if (isNaN(amount) || amount <= 0) {
+                updateStatus('error', 'Please enter a valid amount.');
+                return;
+            }
+            
+            // Show the specific UI based on selected method
+            if (['bitcoin', 'ethereum', 'sparkcoin', 'perfectmoney', 'paypal', 'wallet'].includes(selectedMethod)) {
+                updateStatus('qr-code');
+            } else if (selectedMethod === 'card') {
+                updateStatus('card-details');
+            } else {
+                // For other payments, go straight to processing
+                startProcessing();
+            }
+        });
+
+        // "I have Paid" button for QR code
+        confirmQRBtn.addEventListener('click', () => {
+            startProcessing();
+        });
+
+        // Card form submit
+        cardForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            // Simple validation
+            const cardNumber = document.getElementById('card-number').value;
+            if (cardNumber.length < 16) {
+                document.getElementById('status-card-details').classList.add('shake-animation');
+                setTimeout(() => document.getElementById('status-card-details').classList.remove('shake-animation'), 500);
+                return;
+            }
+            startProcessing();
+        });
+
+        // Function to start processing animation and simulate API call
+        const startProcessing = () => {
+            updateStatus('processing');
+            payNowBtn.disabled = true;
+            payNowBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-loader-2 animate-spin-custom"> <path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span>Processing...</span>';
+
+            // Simulate API call delay
+            setTimeout(() => {
+                const success = Math.random() > 0.1; // 90% success rate
+                if (success) {
+                    updateStatus('success');
+                } else {
+                    updateStatus('error', 'Payment failed. Please try again later.');
+                }
+                payNowBtn.disabled = false;
+                payNowBtn.innerHTML = '<span>Pay Now</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';
+            }, 2000);
+        };
+
+        // Initial content load
+        fetchCompanyInfo();
+    });
+  </script>
+</body>
+</html>

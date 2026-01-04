@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Pharmacy Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .page-content {
+            display: none;
+        }
+        .page-content.active {
+            display: block;
+        }
+        .product-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        }
+        .slider-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.75rem;
+        }
+        .slider {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        .slider img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <div id="app-container" class="flex-grow p-4 md:p-8">
+        <!-- Main Content Area -->
+        <div id="content-area" class="bg-white rounded-xl shadow-lg p-6 md:p-10 max-w-7xl mx-auto my-auto h-full">
+            <!-- Loading and Error State -->
+            <div id="loading-spinner" class="flex justify-center items-center h-full">
+                <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+            
+            <!-- Login Page -->
+            <div id="login-page" class="page-content active flex flex-col items-center justify-center">
+                <h2 class="text-3xl font-bold mb-6 text-center text-blue-600">ePharmacy Login</h2>
+                <div class="w-full max-w-md">
+                    <div class="bg-gray-100 rounded-xl p-8 shadow-md">
+                        <input type="email" id="email" placeholder="Email" class="w-full p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4">
+                        <input type="password" id="password" placeholder="Password" class="w-full p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6">
+                        <button id="login-button" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-md hover:bg-blue-700 transition-colors">Login</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard/Home Pages -->
+            <div id="dashboard-container" class="hidden h-full">
+                <header class="flex justify-between items-center py-4 mb-8 border-b-2 border-gray-200 flex-wrap">
+                    <h1 class="text-2xl font-bold text-blue-600">ePharmacy</h1>
+                    <div class="flex items-center space-x-4 flex-wrap mt-4 md:mt-0">
+                        <!-- Search Bar -->
+                        <div class="relative w-full md:w-auto">
+                            <input type="text" id="product-search" placeholder="Search products..." class="w-full md:w-64 p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <!-- Cart Icon -->
+                        <div id="cart-icon" class="relative cursor-pointer" data-page="cart">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-600 hover:text-blue-600 transition-colors">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6a4.5 4.5 0 10-9 0v4.5H2.25a.75.75 0 00-.75.75v11.25c0 .414.336.75.75.75h19.5a.75.75 0 00.75-.75V11.25a.75.75 0 00-.75-.75H16.5zM12 7.5a1.5 1.5 0 013 0v3a1.5 1.5 0 01-3 0v-3z" />
+                            </svg>
+                            <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-semibold rounded-full w-4 h-4 flex items-center justify-center hidden">0</span>
+                        </div>
+
+                        <span id="user-info" class="font-medium text-gray-700"></span>
+                        <nav id="nav-menu" class="flex space-x-2 sm:space-x-4">
+                            <button class="nav-link text-gray-600 hover:text-blue-600 transition-colors" data-page="home">Home</button>
+                            <button class="nav-link text-gray-600 hover:text-blue-600 transition-colors" data-page="products">Products</button>
+                            <button id="wallet-nav-link" class="nav-link hidden text-gray-600 hover:text-blue-600 transition-colors" data-page="wallet">Wallet</button>
+                            <button id="my-orders-nav-link" class="nav-link hidden text-gray-600 hover:text-blue-600 transition-colors" data-page="my-orders">My Orders</button>
+                            <button class="nav-link text-gray-600 hover:text-blue-600 transition-colors" data-page="about">About</button>
+                            <button class="nav-link text-gray-600 hover:text-blue-600 transition-colors" data-page="contact">Contact</button>
+                            <button id="logout-button" class="text-white bg-red-500 px-3 py-1 rounded-md text-sm hover:bg-red-600 transition-colors">Logout</button>
+                        </nav>
+                    </div>
+                </header>
+
+                <!-- Page Content Sections -->
+                
+                <!-- Home Page -->
+                <div id="home-page" class="page-content">
+                    <div class="slider-container mb-10">
+                        <div id="banner-slider" class="slider">
+                            <img src="https://placehold.co/1200x300/e9d5ff/7c3aed?text=Secure+Online+Transactions" alt="Secure Transactions">
+                            <img src="https://placehold.co/1200x300/dbeafe/3b82f6?text=Wide+Range+of+Medicines" alt="Wide Range">
+                            <img src="https://placehold.co/1200x300/fecaca/ef4444?text=Fast+and+Reliable+Delivery" alt="Fast Delivery">
+                        </div>
+                        <button id="prev-slide" class="absolute top-1/2 left-4 -translate-y-1/2 bg-white rounded-full p-2 shadow-lg text-gray-800 hover:bg-gray-200 transition-colors focus:outline-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <button id="next-slide" class="absolute top-1/2 right-4 -translate-y-1/2 bg-white rounded-full p-2 shadow-lg text-gray-800 hover:bg-gray-200 transition-colors focus:outline-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-800">Explore Our Products</h3>
+                        <div id="product-list-home" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <!-- Featured products will be dynamically added here -->
+                        </div>
+                        <div class="mt-8 text-center">
+                            <button onclick="showPage('products')" class="bg-blue-600 text-white font-semibold py-3 px-8 rounded-md hover:bg-blue-700 transition-colors shadow-lg">View All Products</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Page -->
+                <div id="products-page" class="page-content">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">All Products</h2>
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
+                        <div class="flex items-center space-x-2 w-full sm:w-1/2">
+                            <label for="sort-by" class="font-medium text-gray-700">Sort by:</label>
+                            <select id="sort-by" class="p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
+                                <option value="default">Default</option>
+                                <option value="price-asc">Price: Low to High</option>
+                                <option value="price-desc">Price: High to Low</option>
+                                <option value="name-asc">Name: A-Z</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center space-x-2 w-full sm:w-1/2">
+                            <label for="filter-by" class="font-medium text-gray-700">Filter by:</label>
+                            <select id="filter-by" class="p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
+                                <option value="all">All Categories</option>
+                                <option value="tablets">Tablets</option>
+                                <option value="syrups">Syrups</option>
+                                <option value="creams">Creams</option>
+                                <option value="injections">Injections</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="product-list-products" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- Products will be dynamically added here -->
+                    </div>
+                    <!-- Pagination Controls -->
+                    <div id="pagination-controls" class="flex justify-center items-center space-x-2 mt-8">
+                        <button id="prev-page-btn" class="px-4 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors disabled:opacity-50" disabled>Previous</button>
+                        <div id="page-numbers" class="flex space-x-2">
+                            <!-- Page numbers will be dynamically added here -->
+                        </div>
+                        <button id="next-page-btn" class="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50">Next</button>
+                    </div>
+                </div>
+
+                <!-- Wallet Page -->
+                <div id="wallet-page" class="page-content">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">My Wallet</h2>
+                    <div class="bg-blue-500 text-white rounded-xl p-8 shadow-lg mb-8">
+                        <div class="text-lg font-medium">Current Balance</div>
+                        <div id="wallet-balance" class="text-5xl font-bold mt-2">$0.00</div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-md">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800">Transaction History</h3>
+                        <div id="transaction-history" class="space-y-4">
+                            <!-- Transactions will be dynamically added here -->
+                            <p class="text-gray-500 text-center">No transactions yet.</p>
+                        </div>
+                        <button id="deposit-btn" class="w-full bg-green-500 text-white font-semibold py-3 rounded-md hover:bg-green-600 transition-colors mt-6">Make a Deposit</button>
+                        <div id="deposit-section" class="hidden mt-4">
+                            <h4 class="font-medium text-lg mb-2">Deposit Amount</h4>
+                            <input type="number" id="deposit-input" placeholder="Enter amount" min="0" step="0.01" class="w-full p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2">
+                            <button id="confirm-deposit-btn" class="w-full bg-blue-500 text-white font-semibold py-2 rounded-md hover:bg-blue-600 transition-colors">Confirm Deposit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- About Page -->
+                <div id="about-page" class="page-content">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">About Us</h2>
+                    <p class="text-gray-600 mb-4">Welcome to our e-pharmacy platform, where we leverage cutting-edge technology to provide secure and convenient access to essential medicines. Our mission is to simplify healthcare access for everyone, everywhere.</p>
+                    <p class="text-gray-600">We are committed to providing a wide range of high-quality products, a seamless user experience, and the flexibility of modern cryptocurrency payments. Our dedicated team works to ensure that you receive your orders quickly and securely, with full transparency and support.</p>
+                </div>
+
+                <!-- Contact Page -->
+                <div id="contact-page" class="page-content">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Contact Us</h2>
+                    <div class="bg-gray-100 rounded-xl p-6 shadow-md space-y-4">
+                        <p class="text-gray-600"><strong>Email:</strong> support@epharmacy.com</p>
+                        <p class="text-gray-600"><strong>Phone:</strong> +1 (800) 123-4567</p>
+                        <p class="text-gray-600"><strong>Address:</strong> 123 Health Ave, Wellness City, 10001</p>
+                    </div>
+                </div>
+
+                <!-- Cart Page -->
+                <div id="cart-page" class="page-content">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Your Cart</h2>
+                    <div id="cart-items" class="space-y-6 mb-8">
+                        <!-- Cart items will be dynamically added here -->
+                    </div>
+                    <div id="cart-summary" class="bg-gray-100 rounded-xl p-6 shadow-md space-y-4">
+                        <div class="flex justify-between items-center font-semibold text-lg">
+                            <span>Total:</span>
+                            <span id="cart-total">$0.00</span>
+                        </div>
+                        <button id="checkout-button" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50" disabled>Proceed to Checkout</button>
+                    </div>
+                </div>
+
+                <!-- Payment Page -->
+                <div id="payment-page" class="page-content">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Select Payment Method</h2>
+                    <div class="bg-gray-100 rounded-xl p-6 shadow-md space-y-4 mb-8">
+                        <div id="crypto-options" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            <!-- Crypto options will be dynamically added here -->
+                        </div>
+                    </div>
+
+                    <div id="payment-details-section" class="hidden bg-white rounded-xl p-6 shadow-md">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-800">Payment Details</h3>
+                        <div class="flex flex-col items-center space-y-4 mb-6">
+                            <div id="qr-code-container" class="rounded-lg border-4 border-gray-300 p-2">
+                                <img id="crypto-qr-code" src="" alt="QR Code" class="w-48 h-48 rounded-md">
+                            </div>
+                            <div class="text-center">
+                                <p class="text-gray-600 text-lg">Send payment to the address below:</p>
+                                <div class="bg-gray-200 rounded-md p-3 font-mono break-all mt-2">
+                                    <span id="crypto-address"></span>
+                                    <button id="copy-address-btn" class="ml-2 text-blue-500 hover:text-blue-700 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v6m6-6v6m-6 0h6m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="confirm-payment-btn" class="w-full bg-green-600 text-white font-semibold py-3 rounded-md hover:bg-green-700 transition-colors">
+                            I have sent the payment
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Order Confirmation Page -->
+                <div id="order-confirmation-page" class="page-content text-center">
+                    <div class="bg-white rounded-xl p-8 shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-green-500 mx-auto mb-4 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h2 class="text-3xl font-bold text-gray-800 mb-2">Order Placed Successfully!</h2>
+                        <p class="text-gray-600 mb-6">Thank you for your purchase. A confirmation email with billing details has been sent to your inbox.</p>
+                        
+                        <div class="bg-gray-100 rounded-xl p-6 mb-6 text-left">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">Bill Details</h3>
+                            <div id="bill-details" class="space-y-1">
+                                <!-- Bill details will be dynamically added here -->
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                            <button onclick="showPage('home')" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-md hover:bg-blue-700 transition-colors">Continue Shopping</button>
+                            <button onclick="showPage('my-orders')" class="bg-gray-600 text-white font-semibold py-3 px-6 rounded-md hover:bg-gray-700 transition-colors">Track Order</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Orders Page -->
+                <div id="my-orders-page" class="page-content">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">My Orders</h2>
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <div class="md:w-1/3 bg-white rounded-xl p-6 shadow-md h-fit">
+                            <h3 class="text-xl font-semibold mb-4 text-gray-800">My Addresses</h3>
+                            <div id="address-list" class="space-y-4">
+                                <!-- Addresses will be dynamically added here -->
+                                <p class="text-gray-500 text-center">No addresses added yet.</p>
+                            </div>
+                            <div id="add-address-form" class="mt-4 hidden">
+                                <input type="text" id="new-address-input" placeholder="Enter new address" class="w-full p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2">
+                                <button id="save-address-btn" class="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-colors">Save Address</button>
+                            </div>
+                            <button id="add-address-btn" class="w-full mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">Add Address</button>
+                        </div>
+                        <div class="md:w-2/3 bg-white rounded-xl p-6 shadow-md">
+                            <h3 class="text-xl font-semibold mb-4 text-gray-800">Order History</h3>
+                            <div id="order-history" class="space-y-6">
+                                <!-- Orders will be dynamically added here -->
+                                <p class="text-gray-500 text-center">No orders placed yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for notifications -->
+    <div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl p-8 shadow-2xl w-full max-w-sm text-center">
+            <h3 id="modal-title" class="text-xl font-bold mb-4 text-gray-800"></h3>
+            <p id="modal-message" class="text-gray-600 mb-6"></p>
+            <button id="modal-close" class="bg-blue-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-blue-700 transition-colors">OK</button>
+        </div>
+    </div>
+    
+    <script>
+        let products = [];
+        let cart = [];
+        let users = {
+            'user@mail.com': { role: 'user', addresses: [], orders: [], walletBalance: 0, transactions: [] },
+            'pharmacist@mail.com': { role: 'pharmacist', addresses: [], orders: [], walletBalance: 0, transactions: [] },
+            'admin@mail.com': { role: 'admin', addresses: [], orders: [], walletBalance: 0, transactions: [] }
+        };
+        let currentUser = { role: null, email: null, isAuthenticated: false };
+
+        const pages = document.querySelectorAll('.page-content');
+        const loginPage = document.getElementById('login-page');
+        const dashboardContainer = document.getElementById('dashboard-container');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const productListHome = document.getElementById('product-list-home');
+        const productListProducts = document.getElementById('product-list-products');
+        const cartItemsContainer = document.getElementById('cart-items');
+        const cartTotalSpan = document.getElementById('cart-total');
+        const cartCountSpan = document.getElementById('cart-count');
+        const cryptoOptionsContainer = document.getElementById('crypto-options');
+        const paymentDetailsSection = document.getElementById('payment-details-section');
+        const cryptoQrCodeImg = document.getElementById('crypto-qr-code');
+        const cryptoAddressSpan = document.getElementById('crypto-address');
+        const billDetailsDiv = document.getElementById('bill-details');
+        const addressListDiv = document.getElementById('address-list');
+        const orderHistoryDiv = document.getElementById('order-history');
+        const walletBalanceSpan = document.getElementById('wallet-balance');
+        const transactionHistoryDiv = document.getElementById('transaction-history');
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const bannerSlider = document.getElementById('banner-slider');
+        const depositSection = document.getElementById('deposit-section');
+        const depositInput = document.getElementById('deposit-input');
+        const productSearchInput = document.getElementById('product-search');
+        
+        let sliderIndex = 0;
+        const totalSlides = 3;
+
+        let currentPage = 1;
+        const productsPerPage = 25;
+
+        // Mock Data and State Management
+        const initializeApp = () => {
+            // Seed products
+            products = [
+                { id: '1', name: 'Paracetamol', price: 2.50, category: 'tablets', imageUrl: 'https://placehold.co/150x150/fca5a5/ef4444?text=Tablet', description: 'Pain and fever reliever.' },
+                { id: '2', name: 'Ibuprofen', price: 3.20, category: 'tablets', imageUrl: 'https://placehold.co/150x150/fca5a5/ef4444?text=Tablet', description: 'Anti-inflammatory drug.' },
+                { id: '3', name: 'Amoxicillin', price: 10.00, category: 'tablets', imageUrl: 'https://placehold.co/150x150/fca5a5/ef4444?text=Tablet', description: 'Antibiotic for bacterial infections.' },
+                { id: '4', name: 'Cetirizine', price: 4.00, category: 'tablets', imageUrl: 'https://placehold.co/150x150/fca5a5/ef4444?text=Tablet', description: 'Antihistamine for allergies.' },
+                { id: '5', name: 'Loratadine', price: 4.50, category: 'tablets', imageUrl: 'https://placehold.co/150x150/fca5a5/ef4444?text=Tablet', description: 'Non-drowsy allergy relief.' },
+                { id: '6', name: 'Omeprazole', price: 8.75, category: 'tablets', imageUrl: 'https://placehold.co/150x150/fca5a5/ef4444?text=Tablet', description: 'Reduces stomach acid.' },
+                { id: '7', name: 'Ranitidine', price: 7.50, category: 'tablets', imageUrl: 'https://placehold.co/150x150/fca5a5/ef4444?text=Tablet', description: 'Acid reflux and heartburn relief.' },
+                { id: '8', name: 'Cough Syrup', price: 6.00, category: 'syrups', imageUrl: 'https://placehold.co/150x150/bfdbfe/2563eb?text=Syrup', description: 'Relieves cough and cold symptoms.' },
+                { id: '9', name: 'Guaifenesin Syrup', price: 7.25, category: 'syrups', imageUrl: 'https://placehold.co/150x150/bfdbfe/2563eb?text=Syrup', description: 'Expectorant for chest congestion.' },
+                { id: '10', name: 'Antiseptic Cream', price: 5.50, category: 'creams', imageUrl: 'https://placehold.co/150x150/fce7f3/db2777?text=Cream', description: 'Prevents infection in minor cuts.' },
+                { id: '11', name: 'Hydrocortisone Cream', price: 9.00, category: 'creams', imageUrl: 'https://placehold.co/150x150/fce7f3/db2777?text=Cream', description: 'Relieves itching and rashes.' },
+                { id: '12', name: 'Insulin', price: 50.00, category: 'injections', imageUrl: 'https://placehold.co/150x150/d1fae5/10b981?text=Injection', description: 'Manages blood sugar levels.' },
+                { id: '13', name: 'Flu Vaccine', price: 25.00, category: 'injections', imageUrl: 'https://placehold.co/150x150/d1fae5/10b981?text=Injection', description: 'Protects against seasonal flu.' },
+                // Add many more products here to reach 150+
+                ...Array.from({ length: 140 }, (_, i) => ({
+                    id: `${i+14}`,
+                    name: `Medicine Tablet ${i + 1}`,
+                    price: parseFloat(((i + 1) * 0.1 + 1.5).toFixed(2)),
+                    category: ['tablets', 'syrups', 'creams', 'injections'][Math.floor(Math.random() * 4)],
+                    imageUrl: `https://placehold.co/150x150/fca5a5/ef4444?text=Item${i+14}`,
+                    description: `Generic description for Medicine Tablet ${i + 1}.`,
+                }))
+            ];
+
+            // Load state from local storage
+            const savedState = JSON.parse(localStorage.getItem('ePharmacyState')) || {};
+            if (savedState.users) users = savedState.users;
+            
+            // Initial view
+            loadingSpinner.classList.add('hidden');
+            showPage('login');
+        };
+
+        const saveState = () => {
+            localStorage.setItem('ePharmacyState', JSON.stringify({ users }));
+        };
+
+        const renderUI = () => {
+            loadingSpinner.classList.add('hidden');
+            loginPage.classList.add('hidden');
+            dashboardContainer.classList.remove('hidden');
+
+            document.getElementById('user-info').textContent = `Hello, ${currentUser.role}!`;
+            const walletNavLink = document.getElementById('wallet-nav-link');
+            const myOrdersNavLink = document.getElementById('my-orders-nav-link');
+            
+            if (currentUser.isAuthenticated) {
+                walletNavLink.classList.remove('hidden');
+                myOrdersNavLink.classList.remove('hidden');
+            } else {
+                walletNavLink.classList.add('hidden');
+                myOrdersNavLink.classList.add('hidden');
+            }
+
+            showPage('home');
+        };
+
+        const showPage = (pageName) => {
+            pages.forEach(page => page.classList.remove('active'));
+            const page = document.getElementById(`${pageName}-page`);
+            if (page) {
+                page.classList.add('active');
+            }
+            if (pageName === 'home') renderHomePage();
+            if (pageName === 'products') renderProductsPage();
+            if (pageName === 'cart') renderCart();
+            if (pageName === 'my-orders') renderMyOrders();
+            if (pageName === 'wallet') renderWallet();
+            if (pageName === 'payment') renderPaymentPage();
+        };
+
+        const renderHomePage = () => {
+            const featuredProducts = products.slice(0, 8);
+            renderProducts(featuredProducts, productListHome);
+        };
+        
+        const renderPaymentPage = () => {
+             renderCryptoOptions();
+             paymentDetailsSection.classList.add('hidden'); // Ensure details section is hidden initially
+        }
+
+
+        const renderProductsPage = () => {
+            const sortBy = document.getElementById('sort-by').value;
+            const filterBy = document.getElementById('filter-by').value;
+            const searchTerm = productSearchInput.value.toLowerCase();
+            
+            let filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchTerm) || p.description.toLowerCase().includes(searchTerm));
+
+            if (filterBy !== 'all') {
+                filteredProducts = filteredProducts.filter(p => p.category === filterBy);
+            }
+
+            if (sortBy === 'price-asc') {
+                filteredProducts.sort((a, b) => a.price - b.price);
+            } else if (sortBy === 'price-desc') {
+                filteredProducts.sort((a, b) => b.price - a.price);
+            } else if (sortBy === 'name-asc') {
+                filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+            }
+            
+            // Pagination logic
+            const startIndex = (currentPage - 1) * productsPerPage;
+            const endIndex = startIndex + productsPerPage;
+            const productsToRender = filteredProducts.slice(startIndex, endIndex);
+
+            renderProducts(productsToRender, productListProducts);
+            renderPagination(filteredProducts.length);
+        };
+
+        const renderPagination = (totalProducts) => {
+            const pageNumbersContainer = document.getElementById('page-numbers');
+            pageNumbersContainer.innerHTML = '';
+            const totalPages = Math.ceil(totalProducts / productsPerPage);
+
+            document.getElementById('prev-page-btn').disabled = currentPage === 1;
+            document.getElementById('next-page-btn').disabled = currentPage === totalPages || totalPages === 0;
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.textContent = i;
+                pageBtn.classList.add('px-3', 'py-1', 'rounded-md', 'font-semibold', 'transition-colors');
+                if (i === currentPage) {
+                    pageBtn.classList.add('bg-blue-600', 'text-white');
+                } else {
+                    pageBtn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                }
+                pageBtn.addEventListener('click', () => {
+                    currentPage = i;
+                    renderProductsPage();
+                });
+                pageNumbersContainer.appendChild(pageBtn);
+            }
+        };
+
+        const renderProducts = (productsToRender, container) => {
+            container.innerHTML = '';
+            if (productsToRender.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center col-span-full">No products found matching your criteria.</p>';
+                return;
+            }
+            productsToRender.forEach(product => {
+                const productCard = `
+                    <div class="product-card bg-white p-4 rounded-xl shadow-md border border-gray-200 flex flex-col items-center text-center">
+                        <img src="${product.imageUrl}" alt="${product.name}" class="w-24 h-24 sm:w-32 sm:h-32 rounded-full mb-4 object-cover">
+                        <h4 class="font-semibold text-lg text-gray-800">${product.name}</h4>
+                        <p class="text-gray-500 mb-2">${product.category}</p>
+                        <p class="text-xl font-bold text-blue-600 mb-4">$${product.price.toFixed(2)}</p>
+                        <div class="flex space-x-2 w-full">
+                            <button onclick="addToCart('${product.id}')" class="flex-1 bg-green-500 text-white font-medium py-2 rounded-md hover:bg-green-600 transition-colors">Add to Cart</button>
+                            <button onclick="buyNow('${product.id}')" class="flex-1 bg-blue-500 text-white font-medium py-2 rounded-md hover:bg-blue-600 transition-colors">Buy Now</button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += productCard;
+            });
+        };
+
+        const addToCart = (productId) => {
+            const existingItem = cart.find(item => item.id === productId);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                const product = products.find(p => p.id === productId);
+                if (product) {
+                    cart.push({ ...product, quantity: 1 });
+                }
+            }
+            updateCartCount();
+        };
+
+        const buyNow = (productId) => {
+            cart = [];
+            addToCart(productId);
+            showPage('cart');
+        };
+
+        const renderCart = () => {
+            cartItemsContainer.innerHTML = '';
+            let total = 0;
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<p class="text-gray-500 text-center">Your cart is empty.</p>';
+                document.getElementById('checkout-button').disabled = true;
+            } else {
+                document.getElementById('checkout-button').disabled = false;
+                cart.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+                    const cartItem = `
+                        <div class="flex items-center space-x-4 bg-gray-100 p-4 rounded-xl shadow-sm">
+                            <img src="${item.imageUrl}" alt="${item.name}" class="w-16 h-16 rounded-md">
+                            <div class="flex-grow">
+                                <h4 class="font-semibold text-gray-800">${item.name}</h4>
+                                <p class="text-gray-500">$${item.price.toFixed(2)} per item</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="updateCartQuantity('${item.id}', -1)" class="bg-gray-200 text-gray-700 w-8 h-8 rounded-full flex items-center justify-center">-</button>
+                                <span class="font-medium text-gray-800">${item.quantity}</span>
+                                <button onclick="updateCartQuantity('${item.id}', 1)" class="bg-gray-200 text-gray-700 w-8 h-8 rounded-full flex items-center justify-center">+</button>
+                            </div>
+                            <button onclick="removeFromCart('${item.id}')" class="text-red-500 hover:text-red-700 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    `;
+                    cartItemsContainer.innerHTML += cartItem;
+                });
+            }
+            cartTotalSpan.textContent = `$${total.toFixed(2)}`;
+            updateCartCount();
+        };
+
+        const updateCartQuantity = (productId, change) => {
+            const item = cart.find(i => i.id === productId);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    removeFromCart(productId);
+                } else {
+                    renderCart();
+                }
+            }
+        };
+
+        const removeFromCart = (productId) => {
+            cart = cart.filter(item => item.id !== productId);
+            renderCart();
+        };
+
+        const updateCartCount = () => {
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCountSpan.textContent = count;
+            if (count > 0) {
+                cartCountSpan.classList.remove('hidden');
+            } else {
+                cartCountSpan.classList.add('hidden');
+            }
+        };
+
+        const renderWallet = () => {
+            const user = users[currentUser.email];
+            walletBalanceSpan.textContent = `$${user.walletBalance.toFixed(2)}`;
+
+            transactionHistoryDiv.innerHTML = '';
+            if (user.transactions.length === 0) {
+                transactionHistoryDiv.innerHTML = '<p class="text-gray-500 text-center">No transactions yet.</p>';
+            } else {
+                user.transactions.forEach(tx => {
+                    const txItem = `
+                        <div class="bg-gray-100 p-3 rounded-md border border-gray-200">
+                            <p><strong>Type:</strong> ${tx.type}</p>
+                            <p><strong>Amount:</strong> $${tx.amount.toFixed(2)}</p>
+                            <p class="text-sm text-gray-500">${tx.date}</p>
+                        </div>
+                    `;
+                    transactionHistoryDiv.innerHTML += txItem;
+                });
+            }
+        };
+
+        const makeDeposit = () => {
+            const depositAmount = parseFloat(depositInput.value);
+            if (isNaN(depositAmount) || depositAmount <= 0) {
+                showModal('Invalid Amount', 'Please enter a valid positive amount.');
+                return;
+            }
+
+            const user = users[currentUser.email];
+            user.walletBalance += depositAmount;
+            user.transactions.push({
+                type: 'Deposit',
+                amount: depositAmount,
+                date: new Date().toLocaleString()
+            });
+            
+            saveState();
+            renderWallet();
+            depositInput.value = '';
+            depositSection.classList.add('hidden');
+            showModal('Success', `$${depositAmount.toFixed(2)} has been added to your wallet.`);
+        };
+        
+        const cryptoCurrencies = [
+            { name: 'Bitcoin', icon: 'https://placehold.co/40x40/f7931a/ffffff?text=BTC', address: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa' },
+            { name: 'Ethereum', icon: 'https://placehold.co/40x40/627eea/ffffff?text=ETH', address: '0x1234567890abcdef1234567890abcdef12345678' },
+            { name: 'Spark Coin', icon: 'https://placehold.co/40x40/ffc233/000000?text=SPK', address: 'spk1234567890abcdef1234567890abcdef' },
+            { name: 'Perfect Money', icon: 'https://placehold.co/40x40/000000/ffffff?text=PM', address: 'U12345678' },
+            { name: 'Dogecoin', icon: 'https://placehold.co/40x40/c2a550/ffffff?text=DOGE', address: 'D8H8K8H8L8M8N8P8Q8R8S8T8U8V8W8X8Y8Z8' },
+            { name: 'XRP', icon: 'https://placehold.co/40x40/000000/ffffff?text=XRP', address: 'rL2HhC5tH5hYv3MhB2R1234567890123456' },
+            { name: 'Blendex Coin', icon: 'https://placehold.co/40x40/01777b/ffffff?text=BLX', address: 'blx1234567890abcdef1234567890abcdef' },
+            { name: 'Litecoin', icon: 'https://placehold.co/40x40/345b9b/ffffff?text=LTC', address: 'M8D8N8P8Q8R8S8T8U8V8W8X8Y8Z8' },
+            { name: 'Ripple', icon: 'https://placehold.co/40x40/00a5a5/ffffff?text=XRP', address: 'rP1o1H5hYv3MhB2R1234567890123456' },
+            { name: 'USD Coin', icon: 'https://placehold.co/40x40/2775ca/ffffff?text=USDC', address: '0x9876543210fedcba9876543210fedcba98765432' },
+            { name: 'Tethercoin', icon: 'https://placehold.co/40x40/50af95/ffffff?text=USDT', address: '0xabcde1234567890fedcba9876543210fedcba9876' }
+        ];
+
+        const renderCryptoOptions = () => {
+            cryptoOptionsContainer.innerHTML = '';
+            cryptoCurrencies.forEach(crypto => {
+                const option = `
+                    <button class="bg-white p-4 rounded-xl shadow-md border border-gray-200 flex items-center space-x-4 hover:bg-gray-50 transition-colors" onclick="selectCrypto('${crypto.name}')">
+                        <img src="${crypto.icon}" alt="${crypto.name} icon" class="w-10 h-10 rounded-full">
+                        <span class="font-medium text-gray-800">${crypto.name}</span>
+                    </button>
+                `;
+                cryptoOptionsContainer.innerHTML += option;
+            });
+        };
+
+        const selectCrypto = (cryptoName) => {
+            const selectedCrypto = cryptoCurrencies.find(c => c.name === cryptoName);
+            if (selectedCrypto) {
+                const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${selectedCrypto.address}`;
+                cryptoQrCodeImg.src = qrCodeUrl;
+                cryptoAddressSpan.textContent = selectedCrypto.address;
+                paymentDetailsSection.classList.remove('hidden');
+                document.getElementById('confirm-payment-btn').onclick = () => confirmPayment(selectedCrypto.name);
+            }
+        };
+
+        const confirmPayment = (paymentMethod) => {
+            const orderId = 'ORD-' + Date.now();
+            const orderDate = new Date().toLocaleDateString();
+            const orderTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            const newOrder = {
+                id: orderId,
+                date: orderDate,
+                items: cart.map(item => ({ name: item.name, quantity: item.quantity, price: item.price })),
+                total: orderTotal,
+                paymentMethod: paymentMethod,
+                status: 'Placed',
+                tracking: 'Order placed, awaiting shipment.',
+                address: users[currentUser.email].addresses[0] || 'No address provided'
+            };
+            users[currentUser.email].orders.push(newOrder);
+            saveState();
+            
+            // Render bill details
+            billDetailsDiv.innerHTML = `
+                <p><strong>Order ID:</strong> ${orderId}</p>
+                <p><strong>Date:</strong> ${orderDate}</p>
+                <p><strong>Total:</strong> $${orderTotal.toFixed(2)}</p>
+                <p><strong>Payment Mode:</strong> ${paymentMethod}</p>
+                <p><strong>Shipping to:</strong> ${newOrder.address}</p>
+                <p class="mt-2 text-sm text-gray-500">A bill has been sent to your registered email.</p>
+            `;
+
+            // Reset cart
+            cart = [];
+            updateCartCount();
+
+            // Show confirmation page
+            showPage('order-confirmation-page');
+        };
+
+        const renderMyOrders = () => {
+            // Render addresses
+            const addresses = users[currentUser.email].addresses;
+            addressListDiv.innerHTML = '';
+            if (addresses.length === 0) {
+                addressListDiv.innerHTML = '<p class="text-gray-500 text-center">No addresses added yet.</p>';
+            } else {
+                addresses.forEach((address, index) => {
+                    const addressItem = `
+                        <div class="bg-gray-50 p-3 rounded-md border border-gray-200 flex justify-between items-center">
+                            <span class="text-gray-700">${address}</span>
+                            <button onclick="removeAddress(${index})" class="text-red-500 hover:text-red-700 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    `;
+                    addressListDiv.innerHTML += addressItem;
+                });
+            }
+
+            // Render orders
+            const orders = users[currentUser.email].orders;
+            orderHistoryDiv.innerHTML = '';
+            if (orders.length === 0) {
+                orderHistoryDiv.innerHTML = '<p class="text-gray-500 text-center">No orders placed yet.</p>';
+            } else {
+                orders.forEach(order => {
+                    const orderItemHtml = `
+                        <div class="bg-gray-100 rounded-xl p-6 shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-gray-800">Order ID: ${order.id}</span>
+                                <span class="text-sm text-gray-500">${order.date}</span>
+                            </div>
+                            <p class="text-sm text-gray-600"><strong>Status:</strong> <span class="font-medium text-green-600">${order.status}</span></p>
+                            <p class="text-sm text-gray-600"><strong>Mode of Payment:</strong> ${order.paymentMethod}</p>
+                            <p class="text-sm text-gray-600"><strong>Total:</strong> $${order.total.toFixed(2)}</p>
+                            <div class="mt-4">
+                                <h4 class="font-semibold mb-1">Order Tracking:</h4>
+                                <p class="text-sm text-gray-500">${order.tracking}</p>
+                            </div>
+                            <div class="mt-4">
+                                <h4 class="font-semibold mb-1">Return Policy:</h4>
+                                <p class="text-sm text-gray-500">30-day return policy on all eligible items. Must be in original, sealed packaging.</p>
+                            </div>
+                        </div>
+                    `;
+                    orderHistoryDiv.innerHTML += orderItemHtml;
+                });
+            }
+        };
+
+        const addAddress = () => {
+            const input = document.getElementById('new-address-input');
+            const newAddress = input.value.trim();
+            if (newAddress && users[currentUser.email].addresses.length < 5) {
+                users[currentUser.email].addresses.push(newAddress);
+                saveState();
+                renderMyOrders();
+                input.value = '';
+                document.getElementById('add-address-form').classList.add('hidden');
+            } else if (users[currentUser.email].addresses.length >= 5) {
+                showModal('Limit Reached', 'You can add a maximum of 5 addresses.');
+            }
+        };
+
+        const removeAddress = (index) => {
+            users[currentUser.email].addresses.splice(index, 1);
+            saveState();
+            renderMyOrders();
+        };
+
+        const showModal = (title, message) => {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modal.classList.remove('hidden');
+        };
+        
+        // Event listeners
+        document.getElementById('login-button').addEventListener('click', () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            // A very simple mock authentication
+            const userExists = users[email] && users[email].role === password;
+            
+            if (userExists) {
+                currentUser.role = users[email].role;
+                currentUser.email = email;
+                currentUser.isAuthenticated = true;
+                renderUI();
+                showModal('Login Successful', `Welcome, ${currentUser.role}!`);
+            } else {
+                showModal('Login Failed', 'Invalid email or password.');
+            }
+        });
+
+        document.getElementById('logout-button').addEventListener('click', () => {
+            currentUser = { role: null, email: null, isAuthenticated: false };
+            showPage('login');
+            showModal('Logged Out', 'You have been logged out.');
+        });
+        
+        document.getElementById('modal-close').addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+        
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                showPage(e.target.dataset.page);
+            });
+        });
+        
+        document.getElementById('cart-icon').addEventListener('click', () => {
+            showPage('cart');
+        });
+
+        document.getElementById('checkout-button').addEventListener('click', () => {
+            renderCryptoOptions();
+            showPage('payment');
+        });
+        
+        document.getElementById('add-address-btn').addEventListener('click', () => {
+            const form = document.getElementById('add-address-form');
+            form.classList.toggle('hidden');
+        });
+
+        document.getElementById('save-address-btn').addEventListener('click', addAddress);
+
+        document.getElementById('sort-by').addEventListener('change', () => {
+            currentPage = 1;
+            renderProductsPage();
+        });
+        document.getElementById('filter-by').addEventListener('change', () => {
+            currentPage = 1;
+            renderProductsPage();
+        });
+        productSearchInput.addEventListener('input', () => {
+            currentPage = 1;
+            renderProductsPage();
+        });
+
+        document.getElementById('prev-page-btn').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderProductsPage();
+            }
+        });
+
+        document.getElementById('next-page-btn').addEventListener('click', () => {
+            const totalProducts = products.filter(p => p.name.toLowerCase().includes(productSearchInput.value.toLowerCase()) || p.description.toLowerCase().includes(productSearchInput.value.toLowerCase())).length;
+            const totalPages = Math.ceil(totalProducts / productsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderProductsPage();
+            }
+        });
+
+        document.getElementById('copy-address-btn').addEventListener('click', () => {
+            const address = cryptoAddressSpan.textContent;
+            navigator.clipboard.writeText(address).then(() => {
+                showModal('Copied!', 'The wallet address has been copied to your clipboard.');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                showModal('Error', 'Failed to copy address. Please copy manually.');
+            });
+        });
+        
+        document.getElementById('deposit-btn').addEventListener('click', () => {
+            depositSection.classList.toggle('hidden');
+        });
+
+        document.getElementById('confirm-deposit-btn').addEventListener('click', makeDeposit);
+        
+        // Banner Slider Logic
+        const updateSlider = () => {
+            const slideWidth = bannerSlider.offsetWidth / totalSlides;
+            bannerSlider.style.transform = `translateX(${-sliderIndex * slideWidth}px)`;
+        };
+        document.getElementById('prev-slide').addEventListener('click', () => {
+            sliderIndex = (sliderIndex - 1 + totalSlides) % totalSlides;
+            updateSlider();
+        });
+        document.getElementById('next-slide').addEventListener('click', () => {
+            sliderIndex = (sliderIndex + 1) % totalSlides;
+            updateSlider();
+        });
+        window.addEventListener('resize', updateSlider);
+
+        // Initial setup
+        initializeApp();
+    </script>
+</body>
+</html>
