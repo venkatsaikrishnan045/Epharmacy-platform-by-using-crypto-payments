@@ -1,1 +1,0 @@
-# Epharmacy-platform-by-using-crypto-payments
